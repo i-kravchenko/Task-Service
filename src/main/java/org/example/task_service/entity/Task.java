@@ -1,16 +1,15 @@
 package org.example.task_service.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Task
@@ -25,7 +24,8 @@ public class Task
     @Enumerated(EnumType.STRING)
     private Priority priority;
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
-    private List<Comment> comments;
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "author_id")
     private User author;

@@ -3,10 +3,9 @@ package org.example.task_service.web.controller;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.task_service.dto.task.TaskRequest;
-import org.example.task_service.dto.task.TaskResponse;
-import org.example.task_service.dto.task.UpsertTaskRequest;
+import org.example.task_service.dto.task.*;
 import org.example.task_service.entity.Status;
+import org.example.task_service.service.CommentService;
 import org.example.task_service.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +17,16 @@ import java.util.List;
 public class TaskController
 {
     private final TaskService taskService;
+    private final CommentService commentService;
 
     @GetMapping
     public List<TaskResponse> taskList(@RequestBody(required = false) TaskRequest request) {
         return taskService.tasksList(request == null ? new TaskRequest() : request);
+    }
+
+    @PostMapping("/add-comment")
+    public CommentResponse addComment(@RequestBody @Valid UpsertCommentRequest request) {
+        return commentService.addComment(request);
     }
 
     @GetMapping("/{taskId}")
@@ -50,7 +55,7 @@ public class TaskController
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 
-    @PatchMapping("/change-status/{taskId}")
+    @PatchMapping("/{taskId}/change-status")
     public TaskResponse changeStatus(@PathVariable Long taskId, @RequestParam Status status) {
         return taskService.changeStatus(taskId, status);
     }

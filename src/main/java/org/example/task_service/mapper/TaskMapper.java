@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(
         componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        uses = {
+                CommentMapper.class,
+        }
 )
 public abstract class TaskMapper
 {
@@ -21,7 +24,8 @@ public abstract class TaskMapper
 
     @Mappings({
             @Mapping(target = "responsible",
-                    expression = "java(userRepository.findById(request.getResponsibleId()).get())")
+                    expression = "java(userRepository.findById(request.getResponsibleId()).orElseThrow(() ->\n" +
+                            " new jakarta.persistence.EntityNotFoundException(\"Responsible user not found\")))")
     })
     public abstract Task requestToTask(UpsertTaskRequest request);
     @Mappings({
