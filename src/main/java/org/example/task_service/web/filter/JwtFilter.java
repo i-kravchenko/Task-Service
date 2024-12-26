@@ -1,11 +1,15 @@
 package org.example.task_service.web.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.task_service.dto.ErrorResponse;
 import org.example.task_service.security.JwtProvider;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,15 +35,23 @@ public class JwtFilter extends OncePerRequestFilter
             return;
         }
         String token = authHeader.substring(7);
-        Claims claims = jwtProvider.getClaims(token);
-        if (claims != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            String email = claims.getSubject();
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            Claims claims = jwtProvider.getClaims(token);
+            if (claims != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                String email = claims.getSubject();
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            filterChain.doFilter(request, response);
+        } catch (ExpiredJwtException ex) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            ObjectMapper objectMapper = new ObjectMapper();
+            response.getWriter().write(objectMapper
+                    .writeValueAsString(new ErrorResponse(ex.getMessage())));
         }
-        filterChain.doFilter(request, response);
     }
 }

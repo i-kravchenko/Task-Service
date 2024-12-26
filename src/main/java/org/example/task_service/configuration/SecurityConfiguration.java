@@ -2,6 +2,7 @@ package org.example.task_service.configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.example.task_service.configuration.properties.JwtProperties;
+import org.example.task_service.security.JwtAuthenticationEntryPoint;
 import org.example.task_service.security.UserDetailsServiceImpl;
 import org.example.task_service.web.filter.JwtFilter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -56,9 +57,11 @@ public class SecurityConfiguration
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/api/login").permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers("/api/**").authenticated()
+                                .anyRequest().permitAll()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
                 .sessionManagement(httpSecuritySessionManagementConfigurer ->
                         httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
