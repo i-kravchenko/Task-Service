@@ -1,7 +1,5 @@
 package org.example.task_service.web.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.task_service.dto.task.UpsertCommentRequest;
 import org.example.task_service.entity.Role;
 import org.example.task_service.entity.Status;
 import org.example.task_service.entity.User;
@@ -26,25 +24,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class TaskController_addCommentIT {
+class TaskController_changeStatusTest {
     @Autowired
     MockMvc mockMvc;
 
-    @Autowired
-    ObjectMapper objectMapper;
-
     @Test
-    @DisplayName("Добавление комментария к задаче под администратором")
-    void addComment_RequestedByAdmin_ReturnsSuccessResponse() throws Exception {
+    @DisplayName("Изменение статуса задачи под администратором")
+    void changeStatus_RequestedByAdmin_ReturnsSuccessResponse() throws Exception {
         // given
-        UpsertCommentRequest request = new UpsertCommentRequest();
-        request.setTaskId(1L);
-        request.setText("New comment");
         User user = new User(1L, "admin@mail.com", null, Set.of(Role.ROLE_ADMIN));
         var requestBuilder = MockMvcRequestBuilders
-                .post("/api/tasks/add-comment")
-                .content(objectMapper.writeValueAsBytes(request))
-                .contentType(MediaType.APPLICATION_JSON)
+                .patch("/api/tasks/1/change-status")
+                .param("status", Status.COMPLETE.toString())
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                 .with(authentication(
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())));
@@ -55,24 +46,18 @@ class TaskController_addCommentIT {
                 .andExpectAll(
                         status().isOk(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("$.taskId").value(1L),
-                        jsonPath("$.userId").value(1L),
-                        jsonPath("$.text").value("New comment")
+                        jsonPath("$.status").value(Status.COMPLETE.toString())
                 );
     }
 
     @Test
-    @DisplayName("Попытка добавления комментария к несуществующей задаче")
-    void addComment_RequestedByAdmin_ReturnsNotFoundError() throws Exception {
+    @DisplayName("Попытка изменения статуса несуществующей задачи")
+    void changeStatus_RequestedByAdmin_ReturnsNotFoundError() throws Exception {
         // given
-        UpsertCommentRequest request = new UpsertCommentRequest();
-        request.setTaskId(10L);
-        request.setText("New comment");
         User user = new User(1L, "admin@mail.com", null, Set.of(Role.ROLE_ADMIN));
         var requestBuilder = MockMvcRequestBuilders
-                .post("/api/tasks/add-comment")
-                .content(objectMapper.writeValueAsBytes(request))
-                .contentType(MediaType.APPLICATION_JSON)
+                .patch("/api/tasks/10/change-status")
+                .param("status", Status.COMPLETE.toString())
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
                 .with(authentication(
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())));
@@ -88,42 +73,13 @@ class TaskController_addCommentIT {
     }
 
     @Test
-    @DisplayName("Попытка добавления невалидного комментария к задаче")
-    void addComment_RequestedByAdmin_ReturnsBadRequestError() throws Exception {
+    @DisplayName("Изменение статуса задачи рядовым пользователем")
+    void changeStatus_RequestedByOrdinaryUser_ReturnsSuccessResponse() throws Exception {
         // given
-        UpsertCommentRequest request = new UpsertCommentRequest();
-        request.setTaskId(1L);
-        User user = new User(1L, "admin@mail.com", null, Set.of(Role.ROLE_ADMIN));
-        var requestBuilder = MockMvcRequestBuilders
-                .post("/api/tasks/add-comment")
-                .content(objectMapper.writeValueAsBytes(request))
-                .contentType(MediaType.APPLICATION_JSON)
-                .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
-                .with(authentication(
-                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())));
-
-        // when
-        mockMvc.perform(requestBuilder)
-                // then
-                .andExpectAll(
-                        status().isBadRequest(),
-                        content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("errorMessage").isString()
-                );
-    }
-
-    @Test
-    @DisplayName("Добавление комментария к задаче рядовым пользователем")
-    void addComment_RequestedByOrdinaryUser_ReturnsSuccessResponse() throws Exception {
-        // given
-        UpsertCommentRequest request = new UpsertCommentRequest();
-        request.setTaskId(2L);
-        request.setText("New comment");
         User user = new User(2L, "user@mail.com", null, Set.of(Role.ROLE_USER));
         var requestBuilder = MockMvcRequestBuilders
-                .post("/api/tasks/add-comment")
-                .content(objectMapper.writeValueAsBytes(request))
-                .contentType(MediaType.APPLICATION_JSON)
+                .patch("/api/tasks/2/change-status")
+                .param("status", Status.COMPLETE.toString())
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER")))
                 .with(authentication(
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())));
@@ -134,24 +90,18 @@ class TaskController_addCommentIT {
                 .andExpectAll(
                         status().isOk(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("$.taskId").value(2L),
-                        jsonPath("$.userId").value(2L),
-                        jsonPath("$.text").value("New comment")
+                        jsonPath("$.status").value(Status.COMPLETE.toString())
                 );
     }
 
     @Test
-    @DisplayName("Попытка добавления к чужой задаче рядовым пользователем")
-    void addComment_RequestedByOrdinaryUser_ReturnsAccessDeniedError() throws Exception {
+    @DisplayName("Попытка изменение статуса чужой задачи рядовым пользователем")
+    void changeStatus_RequestedByOrdinaryUser_ReturnsAccessDeniedError() throws Exception {
         // given
-        UpsertCommentRequest request = new UpsertCommentRequest();
-        request.setTaskId(1L);
-        request.setText("New comment");
         User user = new User(2L, "user@mail.com", null, Set.of(Role.ROLE_USER));
         var requestBuilder = MockMvcRequestBuilders
-                .post("/api/tasks/add-comment")
-                .content(objectMapper.writeValueAsBytes(request))
-                .contentType(MediaType.APPLICATION_JSON)
+                .patch("/api/tasks/1/change-status")
+                .param("status", Status.COMPLETE.toString())
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER")))
                 .with(authentication(
                         new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())));
@@ -167,16 +117,12 @@ class TaskController_addCommentIT {
     }
 
     @Test
-    @DisplayName("Попытка добавления комментария к задаче неавторизованным пользователем")
-    void addComment_RequestedByUnauthorizedUser_ReturnsUnauthorizedError() throws Exception {
+    @DisplayName("Попытка Изменение статуса задачи неавторизованным пользователем")
+    void changeStatus_RequestedByUnauthorizedUser_ReturnsUnauthorizedError() throws Exception {
         // given
-        UpsertCommentRequest request = new UpsertCommentRequest();
-        request.setTaskId(1L);
-        request.setText("New comment");
         var requestBuilder = MockMvcRequestBuilders
-                .post("/api/tasks/add-comment")
-                .content(objectMapper.writeValueAsBytes(request))
-                .contentType(MediaType.APPLICATION_JSON);
+                .patch("/api/tasks/1/change-status")
+                .param("status", Status.COMPLETE.toString());
 
         // when
         mockMvc.perform(requestBuilder)

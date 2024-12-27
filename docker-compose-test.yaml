@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-test
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal

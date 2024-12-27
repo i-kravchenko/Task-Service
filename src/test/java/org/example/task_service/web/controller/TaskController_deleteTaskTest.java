@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class TaskController_deleteTaskIT {
+class TaskController_deleteTaskTest {
     @Autowired
     MockMvc mockMvc;
 

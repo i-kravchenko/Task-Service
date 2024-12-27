@@ -1,0 +1,13 @@
+FROM maven:3.9.9-eclipse-temurin-21
+
+WORKDIR /app
+
+COPY pom.xml ./
+
+RUN mvn dependency:go-offline -B
+
+COPY src ./src
+
+RUN apt-get update && apt-get install -y docker.io
+
+CMD ["mvn", "clean", "test"]

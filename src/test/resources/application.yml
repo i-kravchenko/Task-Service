@@ -2,7 +2,7 @@ spring:
   profiles:
     active: test
   datasource:
-    url: jdbc:tc:postgresql:16:///postgres?TC_DAEMON
+    url: jdbc:tc:postgresql:16:///postgres
     username: postgres
     password: postgres
   flyway:

@@ -2,6 +2,7 @@ package org.example.task_service.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.task_service.dto.task.UpsertTaskRequest;
+import org.example.task_service.entity.Priority;
 import org.example.task_service.entity.Role;
 import org.example.task_service.entity.User;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @SpringBootTest
 @AutoConfigureMockMvc(printOnlyOnFailure = false)
-class TaskController_editTaskIT {
+class TaskController_createTaskTest {
     @Autowired
     MockMvc mockMvc;
 
@@ -33,14 +34,16 @@ class TaskController_editTaskIT {
     ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("Изменение задачи под администратором")
-    void editTask_RequestedByAdmin_ReturnsSuccessResponse() throws Exception {
+    @DisplayName("Создание задачи под администратором")
+    void createTask_RequestedByAdmin_ReturnsSuccessResponse() throws Exception {
         // given
         var request = new UpsertTaskRequest();
         request.setTitle("New task");
+        request.setDescription("Task description");
+        request.setResponsibleId(1L);
         User user = new User(1L, "admin@mail.com", null, Set.of(Role.ROLE_ADMIN));
         var requestBuilder = MockMvcRequestBuilders
-                .patch("/api/tasks/1")
+                .post("/api/tasks")
                 .content(objectMapper.writeValueAsBytes(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
@@ -51,22 +54,24 @@ class TaskController_editTaskIT {
         mockMvc.perform(requestBuilder)
                 // then
                 .andExpectAll(
-                        status().isOk(),
+                        status().isCreated(),
                         content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
-                        jsonPath("$.taskId").value(1),
-                        jsonPath("$.title").value("New task")
+                        jsonPath("$.taskId").value(3),
+                        jsonPath("$.priority").value(Priority.LOW.toString())
                 );
     }
 
     @Test
-    @DisplayName("Попытка изменения несуществующей задачи")
-    void editTask_RequestedByAdmin_ReturnsNotFoundError() throws Exception {
+    @DisplayName("Попытка создания задачи на несуществующего ползователя")
+    void createTask_RequestedByAdmin_ReturnsNotFound() throws Exception {
         // given
         var request = new UpsertTaskRequest();
         request.setTitle("New task");
+        request.setDescription("Task description");
+        request.setResponsibleId(10L);
         User user = new User(1L, "admin@mail.com", null, Set.of(Role.ROLE_ADMIN));
         var requestBuilder = MockMvcRequestBuilders
-                .patch("/api/tasks/10")
+                .post("/api/tasks")
                 .content(objectMapper.writeValueAsBytes(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
@@ -84,13 +89,39 @@ class TaskController_editTaskIT {
     }
 
     @Test
-    @DisplayName("Попытка Изменение задачи рядовым пользователем")
-    void editTask_RequestedByOrdinaryUser_ReturnsAccessDeniedError() throws Exception {
+    @DisplayName("Создание задачи с невалидными данными")
+    void createTask_RequestedWithInvalidData_ReturnsBadRequestError() throws Exception {
+        // given
+        var request = new UpsertTaskRequest();
+        User user = new User(1L, "admin@mail.com", null, Set.of(Role.ROLE_ADMIN));
+        var requestBuilder = MockMvcRequestBuilders
+                .post("/api/tasks")
+                .content(objectMapper.writeValueAsBytes(request))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                .with(authentication(
+                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())));
+
+        // when
+        mockMvc.perform(requestBuilder)
+                // then
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON),
+                        jsonPath("errorMessage").isString()
+                );
+    }
+
+    @Test
+    @DisplayName("Попытка создание задачи рядовым пользователем")
+    void createTask_RequestedByOrdinaryUser_ReturnsAccessDeniedError() throws Exception {
         // given
         var request = new UpsertTaskRequest();
         request.setTitle("New task");
+        request.setDescription("Task description");
+        request.setResponsibleId(1L);
         var requestBuilder = MockMvcRequestBuilders
-                .patch("/api/tasks/1")
+                .post("/api/tasks")
                 .content(objectMapper.writeValueAsBytes(request))
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_USER")));
@@ -106,13 +137,15 @@ class TaskController_editTaskIT {
     }
 
     @Test
-    @DisplayName("Попытка Изменение задачи неавторизованным пользователем")
-    void editTask_RequestedByUnauthorizedUser_ReturnsUnauthorizedError() throws Exception {
+    @DisplayName("Попытка создание задачи неавторизованным пользователем")
+    void createTask_RequestedByUnauthorizedUser_ReturnsUnauthorizedError() throws Exception {
         // given
         var request = new UpsertTaskRequest();
         request.setTitle("New task");
+        request.setDescription("Task description");
+        request.setResponsibleId(1L);
         var requestBuilder = MockMvcRequestBuilders
-                .patch("/api/tasks/1")
+                .post("/api/tasks")
                 .content(objectMapper.writeValueAsBytes(request))
                 .contentType(MediaType.APPLICATION_JSON);
 
