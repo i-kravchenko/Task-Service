@@ -10,6 +10,7 @@ import org.example.task_service.configuration.properties.SwaggerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 @SecurityScheme(
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 )
 @EnableConfigurationProperties(SwaggerProperties.class)
 @RequiredArgsConstructor
+@Profile("!test")
 public class SwaggerConfiguration
 {
     private final SwaggerProperties swaggerProperties;

@@ -1,0 +1,13 @@
+drop table if exists comment cascade;
+drop table if exists task cascade;
+drop table if exists user_roles cascade;
+drop table if exists users cascade;
+create table comment (author_id bigint, id bigserial not null, task_id bigint, text varchar(255), primary key (id));
+create table task (author_id bigint, id bigserial not null, responsible_id bigint, description varchar(255), priority varchar(255) check (priority in ('HIGH','MEDIUM','LOW')), status varchar(255) check (status in ('PENDING','IN_PROGRESS','COMPLETE')), title varchar(255), primary key (id));
+create table user_roles (user_id bigint not null, role varchar(255) not null check (role in ('ROLE_USER','ROLE_ADMIN')), primary key (user_id, role));
+create table users (id bigserial not null, email varchar(255), password varchar(255), primary key (id));
+alter table if exists comment add constraint FKfknte4fhjhet3l1802m1yqa50 foreign key (task_id) references task;
+alter table if exists comment add constraint FKir20vhrx08eh4itgpbfxip0s1 foreign key (author_id) references users;
+alter table if exists task add constraint FKnu4tbtolc8avjgstax6sk0woe foreign key (author_id) references users;
+alter table if exists task add constraint FKeivnt0vbx6gcvuvkebtwrwyec foreign key (responsible_id) references users;
+alter table if exists user_roles add constraint FKhfh9dx7w3ubf1co1vdev94g3f foreign key (user_id) references users;

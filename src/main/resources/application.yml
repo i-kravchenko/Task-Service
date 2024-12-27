@@ -1,12 +1,11 @@
 spring:
-  jpa:
-#    show-sql: true
-#    hibernate:
-#      ddl-auto: create
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgres
+  flyway:
+    enabled: true
+    locations: classpath:db/migrations
 app:
   jwt:
     secret: bf27d89448422342e8c26a954d5e984269e2118dc81c55c425ac2403413708f1fcc1e055485d8e10cbf685260a1b16c45fdfa74bef4127a644ec673f9d707ac95f7e22095ade588d55e3ae6f9f0754b26777901f79c48d0c275d456b0d6994d08ca29262b68b875236b91c85996433b06da8f09bd51c5a1ea33d5587070c67cd77b36fac1152b1c32e950ff94b70f184f94ece0e0d34e413f53befd789e93d7324e9b8cdb9376eaf96adb6264114411ea8294b7a012fc1d1160f1fbd9795db8372b3fbff74f69f6dfea08c3ee88503c8c814e8643d46afd1f6a54ef8f7c9e3e2bc2dd7cc384d55a37573fa96a890bd91cbd8b1e9f2c63719dee1a3ad679b6147

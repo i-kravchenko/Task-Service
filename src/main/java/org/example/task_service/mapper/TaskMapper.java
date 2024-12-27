@@ -4,10 +4,7 @@ import org.example.task_service.dto.task.TaskResponse;
 import org.example.task_service.dto.task.UpsertTaskRequest;
 import org.example.task_service.entity.Task;
 import org.example.task_service.repository.UserRepository;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(
@@ -24,7 +21,7 @@ public abstract class TaskMapper
 
     @Mappings({
             @Mapping(target = "responsible",
-                    expression = "java(userRepository.findById(request.getResponsibleId()).orElseThrow(() ->\n" +
+                    expression = "java(request.getResponsibleId() == null ? null : userRepository.findById(request.getResponsibleId()).orElseThrow(() ->\n" +
                             " new jakarta.persistence.EntityNotFoundException(\"Responsible user not found\")))")
     })
     public abstract Task requestToTask(UpsertTaskRequest request);

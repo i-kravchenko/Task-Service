@@ -26,7 +26,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "Task Service")
 @SecurityRequirement(name = "bearerAuth")
-public class TaskController {
+public class TaskController
+{
     private final TaskService taskService;
     private final CommentService commentService;
 

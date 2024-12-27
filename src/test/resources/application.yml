@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    active: test
+  datasource:
+    url: jdbc:tc:postgresql:16:///postgres?TC_DAEMON
+    username: postgres
+    password: postgres
+  flyway:
+    enabled: true
+    locations: classpath:db/migrations, classpath:db/test-migrations
