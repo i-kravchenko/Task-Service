@@ -8,9 +8,13 @@ import org.example.task_service.entity.Role;
 import org.example.task_service.entity.User;
 import org.example.task_service.mapper.CommentMapper;
 import org.example.task_service.repository.CommentRepository;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +22,7 @@ public class CommentServiceImpl implements CommentService
 {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final MessageSource messageSource;
 
     @Override
     public CommentResponse addComment(UpsertCommentRequest request) {
@@ -26,7 +31,13 @@ public class CommentServiceImpl implements CommentService
         Comment comment = commentMapper.requestToComment(request);
         if(!currentUser.getRoles().contains(Role.ROLE_ADMIN) &&
                 !currentUser.getId().equals(comment.getTask().getResponsible().getId())) {
-            throw new AccessDeniedException("You cant add comment to task: " + comment.getTask().getId());
+            Locale locale = LocaleContextHolder.getLocale();
+            throw new AccessDeniedException(messageSource.getMessage(
+                    "messages.errors.access_denied_modify_task",
+                    new Object[]{comment.getTask().getId()},
+                    "You cant add comment to task: " + comment.getTask().getId(),
+                  locale
+            ));
         }
         comment.setUser(currentUser);
         return commentMapper.commentToResponse(commentRepository.save(comment));

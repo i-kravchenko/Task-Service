@@ -22,14 +22,14 @@ public class SecurityService
         try {
             User user = (User) userDetailsService.loadUserByUsername(request.getEmail());
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                throw new BadCredentialsException("Invalid credentials");
+                throw new BadCredentialsException("messages.errors.invalid_credentials");
             }
             String token = jwtProvider.generateToken(user);
             AuthResponse response = new AuthResponse();
             response.setToken(token);
             return response;
         } catch (UsernameNotFoundException ex) {
-            throw new BadCredentialsException("Invalid credentials");
+            throw new BadCredentialsException("messages.errors.invalid_credentials");
         }
     }
 }

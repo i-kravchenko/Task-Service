@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 public class UpsertCommentRequest
 {
     @Schema(description = "Id задачи")
-    @NotNull(message = "taskId is required")
+    @NotNull(message = "messages.errors.taskId_required")
     private Long taskId;
     @Schema(description = "Текст комментария")
-    @NotBlank(message = "text is required")
+    @NotBlank(message = "messages.errors.text_required")
     private String text;
 }

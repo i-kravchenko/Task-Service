@@ -14,13 +14,13 @@ import org.example.task_service.entity.Priority;
 public class UpsertTaskRequest
 {
     @Schema(description = "Название задачи")
-    @NotBlank(message = "title is required")
+    @NotBlank(message = "messages.errors.title_required")
     private String title;
     @Schema(description = "Описание задачи")
-    @NotBlank(message = "description is required")
+    @NotBlank(message = "messages.errors.description_required")
     private String description;
     @Schema(description = "Id ответственного за задачу")
-    @NotNull(message = "responsibleId is required")
+    @NotNull(message = "messages.errors.responsible_required")
     private Long responsibleId;
     @Schema(description = "Приоритет задачи", defaultValue = "LOW")
     private Priority priority;

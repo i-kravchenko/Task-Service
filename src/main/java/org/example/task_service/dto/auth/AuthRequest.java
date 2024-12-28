@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AuthRequest
 {
-    @NotBlank(message = "email is required")
+    @NotBlank(message = "messages.errors.email_required")
     @Email(message = "incorrect email")
     @Schema(description = "Электронная почта пользователя", example = "example@mail.com")
     private String email;
-    @NotBlank(message = "password is required")
+    @NotBlank(message = "messages.errors.password_required")
     @Schema(description = "Пароль пользователя", example = "password")
     private String password;
 }

@@ -22,7 +22,7 @@ public abstract class CommentMapper
     @Mappings({
             @Mapping(target = "task",
                     expression = "java(taskRepository.findById(request.getTaskId()).orElseThrow(() ->\n" +
-                            " new jakarta.persistence.EntityNotFoundException(\"Task not found\")))")
+                            " new jakarta.persistence.EntityNotFoundException(\"messages.errors.task_not_found\")))")
     })
     public abstract Comment requestToComment(UpsertCommentRequest request);
 

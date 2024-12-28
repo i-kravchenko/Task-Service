@@ -22,7 +22,7 @@ public abstract class TaskMapper
     @Mappings({
             @Mapping(target = "responsible",
                     expression = "java(request.getResponsibleId() == null ? null : userRepository.findById(request.getResponsibleId()).orElseThrow(() ->\n" +
-                            " new jakarta.persistence.EntityNotFoundException(\"Responsible user not found\")))")
+                            " new jakarta.persistence.EntityNotFoundException(\"messages.errors.responsible_not_found\")))")
     })
     public abstract Task requestToTask(UpsertTaskRequest request);
     @Mappings({
